@@ -1,0 +1,20 @@
+Package: ProTransDeconv
+Title: Processing and Deconvolution of Protein Data for Cell Type Specificity Analysis
+Version: 0.1.0
+Authors@R:
+    person(given = "Yingnan",
+           family = "Song",
+           role = c("aut", "cre"), # aut = author, cre = maintainer/creator
+           email = "ysong2@usb.edu")
+Description: This package provides functions for the comprehensive analysis of protein data,
+             including various transformation methods, coefficient of variation (CV)
+             calculation, and deconvolution using established algorithms like EDec, Rodeo,
+             csSAM, and bMIND. It generates detailed HTML reports summarizing CV distributions,
+             marker recall rates against gold standards, and cell-type-specific gene expression.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    ggplot2, ggridges, dplyr, knitr, rmarkdown, Rodeo, csSAM, MASS, MIND, preprocessCore, 
+    quadprog, reshape2, purrr, parallel, grDevices, graphics, stats, utils 
