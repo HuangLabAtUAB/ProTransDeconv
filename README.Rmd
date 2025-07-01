@@ -15,6 +15,16 @@ knitr::opts_chunk$set(
 
 # ProTransDeconv
 
+
+## 工作流程
+
+这是项目的总体流程图：
+
+![Workflow Diagram](images/Workflow.pdf  )
+
+
+
+
 <!-- badges: start -->
 <!-- badges: end -->
 
