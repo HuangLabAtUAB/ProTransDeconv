@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 
 这是项目的总体流程图：
 
-![Workflow Diagram](images/Workflow.pdf  )
+![Workflow Diagram](images/Workflow.png)
 
 
 
