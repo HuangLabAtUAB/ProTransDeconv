@@ -3,9 +3,9 @@
 
 # ProTransDeconv
 
-## 工作流程
+## WorkFlow
 
-这是项目的总体流程图：
+This is the workflow of the package：
 
 <figure>
 <img src="images/Workflow.png" alt="Workflow Diagram" />
