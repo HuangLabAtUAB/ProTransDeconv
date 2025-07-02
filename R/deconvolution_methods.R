@@ -328,7 +328,7 @@ run_edec_stage_2 <- function(gene_exp_bulk_samples, cell_type_props) {
 #' @export
 #' @importFrom csSAM csSAMfit
 run_csSAMfit_for_genes <- function(expression_matrix, cell_type_proportions, min_samples = 30) {
-  
+
   all_basis <- list()
   all_basisfit <- list()
   all_genes <- rownames(expression_matrix)
@@ -355,7 +355,7 @@ run_csSAMfit_for_genes <- function(expression_matrix, cell_type_proportions, min
       # csSAMfit expects x as genes x samples and cc as celltypes x samples
       # Here, x is a single gene (1 x N_samples) and cc is N_celltypes x N_samples
       cs_result <- csSAM::csSAMfit(
-        x = matrix(gene_expr_clean, nrow = 1, dimnames = list(gene, names(gene_expr_clean))),
+        x = matrix(gene_expr_clean, nrow = 1),
         cc = t(cell_props_clean), # Transpose cell proportions for csSAMfit
         nperms = 0, # Not performing permutations for differential expression
         fit = "block", # Use block-wise fitting
@@ -364,7 +364,7 @@ run_csSAMfit_for_genes <- function(expression_matrix, cell_type_proportions, min
       
       this_basis <- cs_result$basis
       this_basis[this_basis < 0] <- 0  # Enforce non-negative values
-      # rownames(this_basis) <- gene  # Ensure gene name is preserved
+      rownames(this_basis) <- gene  # Ensure gene name is preserved
       all_basis[[gene]] <- this_basis
       all_basisfit[[gene]] <- cs_result$basisfit # Store basisfit if needed
       
@@ -373,7 +373,9 @@ run_csSAMfit_for_genes <- function(expression_matrix, cell_type_proportions, min
     })
   }
   
-  combined_basis <- if(length(all_basis) > 0) do.call(rbind, all_basis) else NULL
+  #combined_basis <- if(length(all_basis) > 0) do.call(rbind, all_basis) else NULL
+  combined_basis <- do.call(rbind, all_basis)
+  
   
   return(list(
     basis = combined_basis,
