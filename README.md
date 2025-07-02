@@ -2,6 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # ProTransDeconv
+ProTransDeconv performs data transformation, coefficient of variation summarization, and identification of cell-type-specific proteins using protein quantification data derived from Mass Spectrometry (MS).
 
 ## WorkFlow
 
@@ -9,13 +10,10 @@ This is the workflow of the package：
 
 <figure>
 <img src="images/Workflow.png" alt="Workflow Diagram" />
-<figcaption aria-hidden="true">Workflow Diagram</figcaption>
 </figure>
 
 <!-- badges: start -->
 <!-- badges: end -->
-
-The goal of ProTransDeconv is to …
 
 ## Installation
 
