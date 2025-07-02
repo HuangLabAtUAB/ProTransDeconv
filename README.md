@@ -20,7 +20,14 @@ This is the workflow of the package：
 You can install the development version of ProTransDeconv like so:
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+# install devtools if necessary
+install.packages('devtools')
+
+# install the ProTransDeconv package
+devtools::install_github('HuangLabAtUAB/ProTransDeconv')
+
+# load the ProTransDeconv package
+library(ProTransDeconv)
 ```
 
 ## Example
