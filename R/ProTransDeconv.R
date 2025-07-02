@@ -216,10 +216,11 @@ ProTransDeconv <- function(data,
     # Store just the means for overall results
     # EDec_results <- lapply(EDec_results_full, `[[`, "means")
     EDec_results <- EDec_results_full
+    
   } else {
     message("No cell proportion data provided or it is empty. Skipping EDec deconvolution.")
   }
-  
+
   # --- Rodeo Deconvolution ---
   if (requireNamespace("Rodeo", quietly = TRUE)) {
     for (method in names(transformed_list)) {
@@ -227,49 +228,66 @@ ProTransDeconv <- function(data,
       if (is.null(mat) || nrow(mat) == 0 || is.null(cell_proportion) || nrow(cell_proportion) == 0) {
         next
       }
-      try({
-        common_samples_rodeo <- intersect(colnames(mat), rownames(cell_proportion))
-        if (length(common_samples_rodeo) < 2) { # Rodeo requires at least 2 samples
-          message(paste0("Skipping Rodeo for method '", method, "': Not enough common samples (min 2 required)."))
-          next
-        }
-        aligned_mat <- mat[, common_samples_rodeo, drop = FALSE]
-        aligned_cell_props <- t(cell_proportion[common_samples_rodeo, , drop = FALSE])
-        
-        result <- Rodeo::Rodeo(aligned_mat, aligned_cell_props)
+      library(MASS)
+      tryCatch({
+
+        result <- Rodeo::Rodeo(mat, t(cell_proportion))
         if (!is.null(result)) {
-          marker_table <- process_marker_table(result)
+          spec <- compute_specificity(result)
+          genes <- rownames(spec)
+          cells <- colnames(spec)
+          bin_mat <- matrix("no", nrow = length(genes), ncol = length(cells), dimnames = list(genes, cells))
+          for (cell in cells) bin_mat[spec[, cell] > 0.5, cell] <- "yes"
+          colnames(spec) <- paste0(colnames(spec), "_specificity")
+          colnames(bin_mat) <- paste0(colnames(bin_mat), "_marker")
+          combined <- cbind(spec[rownames(bin_mat), , drop = FALSE], bin_mat)
+          marker_table <- data.frame(Gene = rownames(combined), combined, row.names = NULL)
           rodeo_results[[method]] <- result
           rodeo_marker_table[[method]] <- marker_table
         }
-      }, silent = TRUE)
+        
+        else {
+          warning("Rodeo result is NULL for method: ", method)
+        }
+        
+      }, error = function(e) {
+        message("Rodeo failed for method '", method, "': ", conditionMessage(e))
+      }
+      )
+      
+      
     }
     message("Rodeo deconvolution finished for all valid transformations.")
   } else {
     warning("Package 'Rodeo' is not installed. Skipping Rodeo deconvolution.")
   }
-  
+
   
   # --- csSAM Deconvolution ---
   if (requireNamespace("csSAM", quietly = TRUE)) {
     for (method in names(transformed_list)) {
+     
       mat <- transformed_list[[method]]
+      
       if (is.null(mat) || nrow(mat) == 0 || is.null(cell_proportion) || nrow(cell_proportion) == 0) next
-      try({
+  
+      tryCatch({
         # csSAMfit expects x as genes x samples and cc as celltypes x samples
         common_samples_csSAM <- intersect(colnames(mat), rownames(cell_proportion))
-        if (length(common_samples_csSAM) < 2) { # csSAM requires at least 2 samples
+        
+        if (length(common_samples_csSAM) < 2) {
           message(paste0("Skipping csSAM for method '", method, "': Not enough common samples (min 2 required)."))
           next
         }
-        aligned_mat <- mat[, common_samples_csSAM, drop = FALSE]
-        aligned_cell_props <- cell_proportion[common_samples_csSAM, , drop = FALSE] # samples x celltypes
         
-        # Use run_csSAMfit_for_genes which handles iteration and data preparation for csSAMfit
+        aligned_mat <- mat[, common_samples_csSAM, drop = FALSE]
+        aligned_cell_props <- cell_proportion[common_samples_csSAM, , drop = FALSE]  # samples x celltypes
+        
+        # Run csSAM fit
         result_list <- run_csSAMfit_for_genes(
           expression_matrix = aligned_mat,
           cell_type_proportions = aligned_cell_props,
-          min_samples = 30 # You might want to adjust this threshold
+          min_samples = 30
         )
         
         if (!is.null(result_list) && !is.null(result_list$basis)) {
@@ -277,7 +295,10 @@ ProTransDeconv <- function(data,
           csSAM_results[[method]] <- result_list$basis
           csSAM_marker_table[[method]] <- marker_table
         }
-      }, silent = TRUE)
+      }, error = function(e) {
+        warning(paste0("csSAM failed for method '", method, "': ", conditionMessage(e)))
+      })
+      
     }
     message("csSAM deconvolution finished for all valid transformations.")
   } else {
@@ -528,40 +549,47 @@ ProTransDeconv <- function(data,
   
   # --- Prepare and Render R Markdown Report ---
   # Only write HTML report if output_html is not NULL (and not an empty string)
-
-
-
-
-  
+  # Only write HTML report if output_html is not NULL (and not an empty string)
   if (!is.null(output_html) && output_html != "") {
     tmp_rmd <- tempfile(fileext = ".Rmd")
-    
-    # 基础内容
+    # message("Writing Rmd content to: ", tmp_rmd)
+    # Base RMarkdown content
     rmd_content <- c(
       "---",
       "title: \"Summary Report\"",
       "output: html_document",
       "---",
-      "",
-      "<span style='font-size:22px;'>This report summarizes the coefficient of variation (CV)...</span>",
-      "",
+      "<span style='font-size:22px;'>This report summarizes the coefficient of variation (CV) and visualizes ridge density distributions across different
+      transformation methods. Additionally, it includes a heatmap illustrating the recall rates based on cancer-type-specific gold-standard proteins,
+      and the expression of the top five proteins identified by the min-score method. The aim is to evaluate the suitability of various mass
+      spectrometry (MS) proteomics quantification formats for deconvolution in identifying cell-type-specific protein expression.</span>",
       "```{r setup, include=FALSE}",
+      "library(ggplot2)",
+      "library(ggridges)",
+      "library(dplyr)",
+      "library(knitr)",
       "knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)",
       "```",
       "",
       "## CV Summary Table",
-      "<span style='font-size:22px;'>This table presents a statistical summary of the coefficient of variation (CV)...</span>",
+      "<span style='font-size:22px;'> This table presents a statistical summary of the coefficient of variation (CV) across various transformation methods.
+      It includes the mean, median, range of CV values, and the proportion of CVs greater than 0.25 for each method, enabling a comparative assessment of
+      variability and stability introduced by each method.</span>",
       "```{r}",
-      "```{r}",
-      "if (exists('cv_summary') && is.data.frame(cv_summary) && nrow(cv_summary) > 0) {",
+      "if (nrow(cv_summary) > 0) {",
       "  knitr::kable(cv_summary, digits = 3, row.names = FALSE)",
       "} else {",
-      "  cat('No CV summary data available.')",
+      "  cat(\"No CV summary data available.\")",
       "}",
       "```",
       "",
       "## CV Ridge Plot",
-      "<span style='font-size:22px;'>This figure shows the density ridge plot...</span>",
+      "",
+      "<span style='font-size:22px; color:#444;'>",
+      "This figure shows the density ridge plot of the CV for each transformation method, allowing for a visual comparison
+      of CV distributions across methods.",
+      "</span>",
+      "",
       "```{r cv_ridge_plot, echo=FALSE, out.width='100%'}",
       if (!is.null(cv_ridge_plot_file) && file.exists(cv_ridge_plot_file)) {
         paste0("knitr::include_graphics('", cv_ridge_plot_file, "')")
@@ -570,63 +598,132 @@ ProTransDeconv <- function(data,
       },
       "```"
     )
+    # Append Recall Heatmaps
+    if (!is.null(recall_heatmap_files$EDec) && file.exists(recall_heatmap_files$EDec)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Recall Heatmap - EDec\n",
+                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for EDec.</span>\n",
+                       "```{r EDec_heatmap, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", recall_heatmap_files$EDec, "')\n"),
+                       "```\n"
+      )
+    }
+    if (!is.null(recall_heatmap_files$rodeo) && file.exists(recall_heatmap_files$rodeo)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Recall Heatmap - Rodeo\n",
+                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for Rodeo.</span>\n",
+                       "```{r rodeo_heatmap, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", recall_heatmap_files$rodeo, "')\n"),
+                       "```\n"
+      )
+    }
+    if (!is.null(recall_heatmap_files$csSAM) && file.exists(recall_heatmap_files$csSAM)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Recall Heatmap - csSAM\n",
+                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for csSAM.</span>\n",
+                       "```{r csSAM_heatmap, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", recall_heatmap_files$csSAM, "')\n"),
+                       "```\n"
+      )
+    }
+    if (!is.null(recall_heatmap_files$bMIND) && file.exists(recall_heatmap_files$bMIND)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Recall Heatmap - bMIND\n",
+                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for bMIND.</span>\n",
+                       "```{r bMIND_heatmap, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", recall_heatmap_files$bMIND, "')\n"),
+                       "```\n"
+      )
+    }
+    # Append Marker Barplots
+    if (!is.null(marker_barplot_files$EDec) && file.exists(marker_barplot_files$EDec)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Marker Barplot - EDec (Min_score Method)\n",
+                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using EDec.</span>\n",
+                       "```{r EDec_barplot, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", marker_barplot_files$EDec, "')\n"),
+                       "```\n"
+      )
+    }
+    if (!is.null(marker_barplot_files$rodeo) && file.exists(marker_barplot_files$rodeo)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Marker Barplot - Rodeo (Min_score Method)\n",
+                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using Rodeo.</span>\n",
+                       "```{r rodeo_barplot, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", marker_barplot_files$rodeo, "')\n"),
+                       "```\n"
+      )
+    }
+    if (!is.null(marker_barplot_files$csSAM) && file.exists(marker_barplot_files$csSAM)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Marker Barplot - csSAM (Min_score Method)\n",
+                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using csSAM.</span>\n",
+                       "```{r csSAM_barplot, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", marker_barplot_files$csSAM, "')\n"),
+                       "```\n"
+      )
+    }
+    if (!is.null(marker_barplot_files$bMIND) && file.exists(marker_barplot_files$bMIND)) {
+      rmd_content <- c(rmd_content,
+                       "\n## Marker Barplot - bMIND (Min_score Method)\n",
+                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using bMIND.</span>\n",
+                       "```{r bMIND_barplot, echo=FALSE, out.width='100%'}\n",
+                       paste0("knitr::include_graphics('", marker_barplot_files$bMIND, "')\n"),
+                       "```\n"
+      )
+    }
+    writeLines(rmd_content, tmp_rmd)
     
-    # 追加 Heatmap 图片部分
-    heatmap_chunks <- purrr::imap(recall_heatmap_files, function(file, method) {
-      if (!is.null(file) && file.exists(file)) {
-        return(c(
-          paste0("\n## Recall Heatmap - ", method),
-          "<span style='font-size:22px;'>This plot presents the recall rates...</span>",
-          paste0("```{r ", method, "_heatmap, echo=FALSE, out.width='100%'}"),
-          paste0("knitr::include_graphics('", file, "')"),
-          "```"
-        ))
-      }
-      NULL
-    }) %>% purrr::compact() %>% unlist()
+    # Try rendering, catch any errors
     
-    # 追加 Barplot 图片部分
-    barplot_chunks <- purrr::imap(marker_barplot_files, function(file, method) {
-      if (!is.null(file) && file.exists(file)) {
-        return(c(
-          paste0("\n## Marker Barplot - ", method),
-          "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins...</span>",
-          paste0("```{r ", method, "_barplot, echo=FALSE, out.width='100%'}"),
-          paste0("knitr::include_graphics('", file, "')"),
-          "```"
-        ))
-      }
-      NULL
-    }) %>% purrr::compact() %>% unlist()
-    
-    # 拼接所有部分
-    full_rmd <- c(rmd_content, heatmap_chunks, barplot_chunks)
-    
-    # 写入 Rmd 文件
-    writeLines(full_rmd, tmp_rmd)
-    
-    # 可选：调试查看 .Rmd 内容
-    # cat(readLines(tmp_rmd), sep = "\n")
-    
-    # 渲染
     tryCatch({
+      
       rmarkdown::render(tmp_rmd,
+                        
                         output_file = basename(output_html),
+                        
                         output_dir = dirname(output_html),
+                        
                         quiet = TRUE)
+      
       message("HTML Report Finished: ", output_html)
+      
     }, error = function(e) {
+      
       warning("Failed to render HTML report: ", conditionMessage(e))
+      
     }, finally = {
-      if (file.exists(tmp_rmd)) unlink(tmp_rmd)
-      all_temp_plots <- c(cv_ridge_plot_file, unlist(recall_heatmap_files), unlist(marker_barplot_files))
-      for (f in all_temp_plots) {
-        if (!is.null(f) && file.exists(f)) unlink(f)
+      
+      if (file.exists(tmp_rmd)) {
+        
+        unlink(tmp_rmd) # Clean up temporary Rmd file
+        
+        # message("Temporary Rmd file removed: ", tmp_rmd)
+        
       }
+      
+      # Also clean up temporary plot files if they exist
+      
+      all_temp_plots <- c(cv_ridge_plot_file, unlist(recall_heatmap_files), unlist(marker_barplot_files))
+      
+      for (f in all_temp_plots) {
+        
+        if (!is.null(f) && file.exists(f)) {
+          
+          unlink(f)
+          
+        }
+        
+      }
+      
     })
+    
   } else {
+    
     message("output_html is NULL or empty. Skipping HTML report generation.")
+    
   }
+  
   
 
 
