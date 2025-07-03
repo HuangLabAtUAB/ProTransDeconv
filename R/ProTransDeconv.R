@@ -601,8 +601,8 @@ ProTransDeconv <- function(data,
     # Append Recall Heatmaps
     if (!is.null(recall_heatmap_files$EDec) && file.exists(recall_heatmap_files$EDec)) {
       rmd_content <- c(rmd_content,
-                       "\n## Recall Heatmap - EDec\n",
-                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for EDec.</span>\n",
+                       "\n## Recall Heatmap \n",
+                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type.</span>\n",
                        "```{r EDec_heatmap, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", recall_heatmap_files$EDec, "')\n"),
                        "```\n"
@@ -610,8 +610,7 @@ ProTransDeconv <- function(data,
     }
     if (!is.null(recall_heatmap_files$rodeo) && file.exists(recall_heatmap_files$rodeo)) {
       rmd_content <- c(rmd_content,
-                       "\n## Recall Heatmap - Rodeo\n",
-                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for Rodeo.</span>\n",
+                       "\n##\n",
                        "```{r rodeo_heatmap, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", recall_heatmap_files$rodeo, "')\n"),
                        "```\n"
@@ -619,8 +618,7 @@ ProTransDeconv <- function(data,
     }
     if (!is.null(recall_heatmap_files$csSAM) && file.exists(recall_heatmap_files$csSAM)) {
       rmd_content <- c(rmd_content,
-                       "\n## Recall Heatmap - csSAM\n",
-                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for csSAM.</span>\n",
+                       "\n## \n",
                        "```{r csSAM_heatmap, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", recall_heatmap_files$csSAM, "')\n"),
                        "```\n"
@@ -628,8 +626,7 @@ ProTransDeconv <- function(data,
     }
     if (!is.null(recall_heatmap_files$bMIND) && file.exists(recall_heatmap_files$bMIND)) {
       rmd_content <- c(rmd_content,
-                       "\n## Recall Heatmap - bMIND\n",
-                       "<span style='font-size:22px;'>This plot presents the recall rates of gold-standard proteins of each cell type for bMIND.</span>\n",
+                       "\n## \n",
                        "```{r bMIND_heatmap, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", recall_heatmap_files$bMIND, "')\n"),
                        "```\n"
@@ -638,8 +635,8 @@ ProTransDeconv <- function(data,
     # Append Marker Barplots
     if (!is.null(marker_barplot_files$EDec) && file.exists(marker_barplot_files$EDec)) {
       rmd_content <- c(rmd_content,
-                       "\n## Marker Barplot - EDec (Min_score Method)\n",
-                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using EDec.</span>\n",
+                       "\n## Marker Barplot (Min_score Method)\n",
+                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score.</span>\n",
                        "```{r EDec_barplot, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", marker_barplot_files$EDec, "')\n"),
                        "```\n"
@@ -647,8 +644,7 @@ ProTransDeconv <- function(data,
     }
     if (!is.null(marker_barplot_files$rodeo) && file.exists(marker_barplot_files$rodeo)) {
       rmd_content <- c(rmd_content,
-                       "\n## Marker Barplot - Rodeo (Min_score Method)\n",
-                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using Rodeo.</span>\n",
+                       "\n## \n",
                        "```{r rodeo_barplot, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", marker_barplot_files$rodeo, "')\n"),
                        "```\n"
@@ -656,8 +652,7 @@ ProTransDeconv <- function(data,
     }
     if (!is.null(marker_barplot_files$csSAM) && file.exists(marker_barplot_files$csSAM)) {
       rmd_content <- c(rmd_content,
-                       "\n## Marker Barplot - csSAM (Min_score Method)\n",
-                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using csSAM.</span>\n",
+                       "\n## \n",
                        "```{r csSAM_barplot, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", marker_barplot_files$csSAM, "')\n"),
                        "```\n"
@@ -665,8 +660,7 @@ ProTransDeconv <- function(data,
     }
     if (!is.null(marker_barplot_files$bMIND) && file.exists(marker_barplot_files$bMIND)) {
       rmd_content <- c(rmd_content,
-                       "\n## Marker Barplot - bMIND (Min_score Method)\n",
-                       "<span style='font-size:22px;'>This plot shows the specificity of the top five proteins in each cell type, identified by the Min_score method using bMIND.</span>\n",
+                       "\n## \n",
                        "```{r bMIND_barplot, echo=FALSE, out.width='100%'}\n",
                        paste0("knitr::include_graphics('", marker_barplot_files$bMIND, "')\n"),
                        "```\n"
