@@ -164,12 +164,12 @@ process_logistic_spectra <- function(data) {
 
 # Helper function for compute_cv_summary (internal to the package)
 # Not exported.
-compute_cv_summary <- function(mat, use_markers_only, marker_genes) {
-  if (use_markers_only && !is.null(marker_genes)) {
-    mat <- mat[rownames(mat) %in% marker_genes, , drop = FALSE]
-  }
-  # Handle case where mat might be empty after filtering
-  if (nrow(mat) == 0) return(numeric(0))
+compute_cv_summary <- function(mat) {
+  # Handle case where mat might be NULL or empty
+  if (is.null(mat) || nrow(mat) == 0) return(numeric(0))
   vals <- compute_cv(mat)
   vals[is.finite(vals)]
 }
+
+
+
