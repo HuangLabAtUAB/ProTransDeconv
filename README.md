@@ -17,7 +17,7 @@ This is the workflow of the package：
 
 ## Installation
 
-You can install the development version of ProTransDeconv like so:
+You can install the ProTransDeconv like so:
 
 ``` r
 # install devtools if necessary
@@ -32,11 +32,15 @@ library(ProTransDeconv)
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+This is a basic example which shows you how to run ProTransDeconv:
 
 ``` r
 library(ProTransDeconv)
-## basic example code
+results <- ProTransDeconv(
+    data = Protein_Quantification,
+    type = "intensity", run_bmind = FALSE,
+    cell_proportion = Cell_Type_Proportion
+)
 ```
 
 What is special about using `README.Rmd` instead of just `README.md`?
