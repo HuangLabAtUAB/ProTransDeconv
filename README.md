@@ -73,10 +73,11 @@ gold_standard_markers:
 If cell type proportions are provided, this includes the inferred gold-standard 
 marker genes for each cell type based on correlation and significance thresholds.
 
-****** The result is a list containing the following elements ******
+****** The summary_report.html provides comprehensive report ******
 
-
-
+The report includes a CV summary table and a density ridge plot. Additionally, 
+if cell type proportions are provided, it also presents recall rates based on 
+gold-standard markers and showcases examples of gene specificity across different cell types.
 
 
 
