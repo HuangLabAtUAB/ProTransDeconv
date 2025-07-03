@@ -46,8 +46,9 @@ results <- ProTransDeconv(
 Result Explanation:
 
 ``` r
-### Output: results
-The result is a list containing the following elements:
+############## Output: results and summary_report.html ############## 
+
+****** The result is a list containing the following elements ******
 
 transformed_list: 
 Protein expression matrices processed using different transformation methods.
@@ -71,6 +72,13 @@ type proportions and bulk protein expression across samples for each gene.
 gold_standard_markers: 
 If cell type proportions are provided, this includes the inferred gold-standard 
 marker genes for each cell type based on correlation and significance thresholds.
+
+****** The result is a list containing the following elements ******
+
+
+
+
+
 
 ```
 
