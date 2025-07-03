@@ -2,7 +2,7 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # ProTransDeconv
-ProTransDeconv performs data transformation, coefficient of variation summarization, and identification of cell-type-specific proteins using protein quantification data derived from Mass Spectrometry (MS).
+ProTransDeconv performs data transformation, coefficient of variation (CV) summarization, and identification of cell-type-specific proteins using protein quantification data derived from Mass Spectrometry (MS).
 
 ## WorkFlow
 
@@ -46,18 +46,15 @@ results <- ProTransDeconv(
 Result Explanation:
 
 ``` r
-### Output: `results`
-The result is a list containing the following components:
-- `transformed_list`: transformation
+### Output: results
+The result is a list containing the following elements:
+transformed_list: Protein expression matrices processed using different transformation methods.
+cv_summary: A summary of the CV under different transformation methods, including mean, median, proportion greater than 0.25, and so on.
+cv_plot_data: Gene-wise CV values across various transformation methods, used for visualization.
+EDec, rodeo, csSAM, bMIND:  If cell type proportions are provided, these contain the estimated cell-type-specific expression profiles and specificity scores using respective deconvolution methods under different transformations.
+gene_cell_correlation: If cell type proportions are provided, this shows the correlation between cell type proportions and bulk protein expression across samples for each gene.
+gold_standard_markers: If cell type proportions are provided, this includes the inferred gold-standard marker genes for each cell type based on correlation and significance thresholds.
 
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
 ```
 
 
