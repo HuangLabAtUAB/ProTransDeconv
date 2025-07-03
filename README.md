@@ -49,17 +49,28 @@ Result Explanation:
 ### Output: results
 The result is a list containing the following elements:
 
-transformed_list: Protein expression matrices processed using different transformation methods.
+transformed_list: 
+Protein expression matrices processed using different transformation methods.
 
-cv_summary: A summary of the CV under different transformation methods, including mean, median, proportion greater than 0.25, and so on.
+cv_summary: 
+A summary of the CV under different transformation methods, including mean, median, 
+proportion greater than 0.25, and so on.
 
-cv_plot_data: Gene-wise CV values across various transformation methods, used for visualization.
+cv_plot_data: 
+Gene-wise CV values across various transformation methods, used for visualization.
 
-EDec, rodeo, csSAM, bMIND:  If cell type proportions are provided, these contain the estimated cell-type-specific expression profiles and specificity scores using respective deconvolution methods under different transformations.
+EDec, rodeo, csSAM, bMIND:  
+If cell type proportions are provided, these contain the estimated 
+cell-type-specific expression profiles and specificity scores using respective 
+deconvolution methods under different transformations.
 
-gene_cell_correlation: If cell type proportions are provided, this shows the correlation between cell type proportions and bulk protein expression across samples for each gene.
+gene_cell_correlation: 
+If cell type proportions are provided, this shows the correlation between cell 
+type proportions and bulk protein expression across samples for each gene.
 
-gold_standard_markers: If cell type proportions are provided, this includes the inferred gold-standard marker genes for each cell type based on correlation and significance thresholds.
+gold_standard_markers: 
+If cell type proportions are provided, this includes the inferred gold-standard 
+marker genes for each cell type based on correlation and significance thresholds.
 
 ```
 
