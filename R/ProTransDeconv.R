@@ -1,17 +1,15 @@
 #' Process and Report CV with Optional Deconvolution
 #'
 #' Computes CV across multiple normalization methods, generates a report,
-#' and performs EDec deconvolution if cell type proportions are provided.
+#' and performs deconvolution if cell type proportions are provided.
 #'
 #' @param data Expression matrix (genes x samples)
 #' @param type One of "intensity", "ratio", or "spectra count"
-#' @param marker_genes Optional vector of marker gene names
-#' @param use_markers_only Logical, filter CV computation to marker_genes
 #' @param run_bmind Logical, whether to run bMIND deconvolution. Default is FALSE.
-#' @param cv_threshold Threshold for flagging high CV
+#' @param cv_threshold Threshold for flagging high CV. Default is 0.25.
 #' @param output_html Path to save the generated HTML report. Default is "summary_report.html" in current working directory.
-#' @param cor_threshold_gold_standard Correlation threshold for gold standard marker identification.
-#' @param pval_threshold_gold_standard P-value threshold for gold standard marker identification.
+#' @param cor_threshold_gold_standard Correlation threshold for gold standard marker identification. Default is 0.5.
+#' @param pval_threshold_gold_standard P-value threshold for gold standard marker identification. Default is 0.05.
 #' @param cell_proportion Optional cell type proportion matrix for deconvolution (samples x cell types).
 #'
 #' @return A list containing transformed data, CV summary, ridge plot data,
@@ -36,8 +34,7 @@
 #' @importFrom utils head tail
 ProTransDeconv <- function(data,
                            type = c("intensity", "ratio", "spectra count"),
-                           marker_genes = NULL,
-                           use_markers_only = FALSE, run_bmind = FALSE,
+                           run_bmind = FALSE,
                            cv_threshold = 0.25, cor_threshold_gold_standard = 0.5,
                            output_html = NULL, pval_threshold_gold_standard = 0.05,
                            cell_proportion = NULL) {
@@ -141,7 +138,7 @@ ProTransDeconv <- function(data,
   prop_col_name <- paste0("Prop_GT_", cv_threshold)
   
   cv_summary <- lapply(names(transformed_list), function(method) {
-    vals <- compute_cv_summary(transformed_list[[method]], use_markers_only, marker_genes)
+    vals <- compute_cv_summary(transformed_list[[method]])
     if (length(vals) == 0) return(NULL) # Skip if no CV values computed
     qtiles <- quantile(vals, probs = c(0.25, 0.75), na.rm = TRUE)
     row <- data.frame(
@@ -176,7 +173,7 @@ ProTransDeconv <- function(data,
   rownames(cv_summary) <- seq_len(nrow(cv_summary))
   
   cv_df <- lapply(names(transformed_list), function(method) {
-    vals <- compute_cv_summary(transformed_list[[method]], use_markers_only, marker_genes)
+    vals <- compute_cv_summary(transformed_list[[method]] )
     if (length(vals) == 0) return(NULL)
     data.frame(Method = method, CV = vals, Group = type)
   }) %>% bind_rows() %>% na.omit()
