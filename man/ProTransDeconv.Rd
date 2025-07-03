@@ -7,8 +7,6 @@
 ProTransDeconv(
   data,
   type = c("intensity", "ratio", "spectra count"),
-  marker_genes = NULL,
-  use_markers_only = FALSE,
   run_bmind = FALSE,
   cv_threshold = 0.25,
   cor_threshold_gold_standard = 0.5,
@@ -22,19 +20,15 @@ ProTransDeconv(
 
 \item{type}{One of "intensity", "ratio", or "spectra count"}
 
-\item{marker_genes}{Optional vector of marker gene names}
-
-\item{use_markers_only}{Logical, filter CV computation to marker_genes}
-
 \item{run_bmind}{Logical, whether to run bMIND deconvolution. Default is FALSE.}
 
-\item{cv_threshold}{Threshold for flagging high CV}
+\item{cv_threshold}{Threshold for flagging high CV. Default is 0.25.}
 
-\item{cor_threshold_gold_standard}{Correlation threshold for gold standard marker identification.}
+\item{cor_threshold_gold_standard}{Correlation threshold for gold standard marker identification. Default is 0.5.}
 
 \item{output_html}{Path to save the generated HTML report. Default is "summary_report.html" in current working directory.}
 
-\item{pval_threshold_gold_standard}{P-value threshold for gold standard marker identification.}
+\item{pval_threshold_gold_standard}{P-value threshold for gold standard marker identification. Default is 0.05.}
 
 \item{cell_proportion}{Optional cell type proportion matrix for deconvolution (samples x cell types).}
 }
@@ -45,5 +39,5 @@ gene-cell correlation, and identified gold standard markers.
 }
 \description{
 Computes CV across multiple normalization methods, generates a report,
-and performs EDec deconvolution if cell type proportions are provided.
+and performs deconvolution if cell type proportions are provided.
 }
