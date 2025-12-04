@@ -1,6 +1,9 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+Citation:
+[Song Y, Zhou, Q, and Huang C. J Proteome Res. 2025](https://pubmed.ncbi.nlm.nih.gov/41328725/)
+
 # ProTransDeconv
 ProTransDeconv performs data transformation, coefficient of variation (CV) summarization, and identification of cell-type-specific proteins using protein quantification data derived from Mass Spectrometry (MS).
 
@@ -80,5 +83,3 @@ if cell type proportions are provided, it also presents recall rates based on
 gold-standard markers and showcases examples of gene specificity across different cell types.
 
 ```
-Citation:
-[Song Y, Zhou, Q, and Huang C. J Proteome Res. 2025](https://pubmed.ncbi.nlm.nih.gov/41328725/)
